@@ -1,7 +1,11 @@
 FROM redhat/ubi8
 
-RUN yum install python3 && pip3 install flask
+RUN yum install -y python3 python3-pip && pip3 install flask
 
-COPY first.py /app.py
+COPY app.py /app/app.py
 
-CMD { "python3" ,"app.py"}
+WORKDIR /app
+
+EXPOSE 5000
+
+CMD ["python3", "app.py"]
