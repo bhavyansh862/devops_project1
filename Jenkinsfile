@@ -1,40 +1,45 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    DOCKER_IMAGE = 'bhavyansh862/flask-app:latest'
-  }
-
-  stages {
-    stage('Clone GitHub Repo') {
-      steps {
-        git 'https://github.com/bhavyansh862/devops_project1.git'
-      }
+    environment {
+        DOCKER_IMAGE = 'bhavyansh862/flask-app:latest'   
+        DOCKER_CREDENTIALS_ID = 'dockerhub-creds'          
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'       
     }
 
-    stage('Build Docker Image') {
-      steps {
-        script {
-          dockerImage = docker.build("${DOCKER_IMAGE}")
+    stages {
+        stage('Clone GitHub Repo') {
+            steps {
+                git branch: 'main', 
+                    url: 'https://github.com/bhavyansh862/devops_project1.git'
+            }
         }
-      }
-    }
 
-    stage('Push to DockerHub') {
-      steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
-            dockerImage.push()
-          }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKER_IMAGE .'
+                }
+            }
         }
-      }
-    }
 
-    stage('Deploy to Kubernetes') {
-      steps {
-        sh 'kubectl apply -f k8s/deployment.yaml'
-        sh 'kubectl apply -f k8s/service.yaml'
-      }
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                        sh 'docker push $DOCKER_IMAGE'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f k8s/service.yaml'
+                }
+            }
+        }
     }
-  }
 }
