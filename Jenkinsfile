@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'bhavyansh862/flask-app:latest'   
-        DOCKER_CREDENTIALS_ID = 'dockerhub-creds'          
+    DOCKER_IMAGE = "bhavyansh0881/flask-app:latest"
+    DOCKER_CREDENTIALS_ID = "dockerhub"  
         KUBECONFIG = '/var/lib/jenkins/.kube/config'       
     }
 
